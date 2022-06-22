@@ -10,7 +10,6 @@ router.post("/signup", async (req, res) => {
       res.status(200).send({ mess: "Already Exists" });
     } else {
       const user = await UserList.create(req.body);
-      console.log(user);
       res.status(200).send({ mess: "Signup Success!!" });
     }
   } catch (e) {
@@ -34,13 +33,32 @@ router.post("/getuser", async (req, res) => {
 });
 
 router.post("/addmedicine", async (req, res) => {
-  const { email, mid, cid } = req.body;
+  const { email, mid, cid, qty } = req.body;
   try {
-    const addmed = await UserList.updateOne(
-      { email },
-      { $push: { cart: { mid, cid } } }
-    );
-    res.status(200).send("Added");
+    if (qty === 1) {
+      const addmed = await UserList.updateOne(
+        { email },
+        { $push: { cart: { mid, cid, qty, isReviewed: false } } }
+      );
+      res.status(200).send("Added");
+    } else {
+      const addmed = await UserList.updateOne(
+        {
+          email,
+          "cart.mid": mid,
+          "cart.cid": cid,
+        },
+        {
+          $set: {
+            "cart.$.mid": mid,
+            "cart.$.cid": cid,
+            "cart.$.qty": qty,
+            "cart.$.isReviewed": false,
+          },
+        }
+      );
+      res.status(200).send("Added1");
+    }
   } catch (e) {
     console.log(e);
     res.status(400).send(e);
@@ -48,13 +66,32 @@ router.post("/addmedicine", async (req, res) => {
 });
 
 router.post("/removemedicine", async (req, res) => {
-  const { email, mid, cid } = req.body;
+  const { email, mid, cid, qty } = req.body;
   try {
-    const deletemed = await UserList.updateOne(
-      { email },
-      { $pull: { cart: { mid, cid } } }
-    );
-    res.status(200).send("Removed");
+    if (qty === 0) {
+      const deletemed = await UserList.updateOne(
+        { email },
+        { $pull: { cart: { mid, cid } } }
+      );
+      res.status(200).send("Removed");
+    } else {
+      const deletemed = await UserList.updateOne(
+        {
+          email,
+          "cart.mid": mid,
+          "cart.cid": cid,
+        },
+        {
+          $set: {
+            "cart.$.mid": mid,
+            "cart.$.cid": cid,
+            "cart.$.qty": qty,
+            "cart.$.isReviewed": false,
+          },
+        }
+      );
+      res.status(200).send("Removed1");
+    }
   } catch (e) {
     console.log(e);
     res.status(400).send(e);
