@@ -4,8 +4,9 @@ const medicineSchema = mongoose.Schema({
   name: String,
   expiry_date: String,
   type: String,
-  price:Number,
-  cuttedPrice:Number
+  price: Number,
+  cuttedPrice: Number,
+  reviews: Array,
 });
 
 const MedicineList = mongoose.model("medicine", medicineSchema);

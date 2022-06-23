@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
 const orderSchema = mongoose.Schema({
-  //   email: String,
-  //   oid: String,
-  //   details: String,
-  //   orderedDate: String,
-  //   packedDate: String,
-  //   shippedDate: String,
-  //   deliveredDate: String,
-  //   pickupDate: String,
-  //   returnDate: String,
-  //   status: String,
-  order: Array,
+  order: [
+    {
+      oid: String,
+      details: {
+        // cartdet: {
+        //   // cartitems: [{ cid: String, mid: String }],
+        // },
+      },
+    },
+  ],
 });
 
 const OrderList = mongoose.model("order", orderSchema);

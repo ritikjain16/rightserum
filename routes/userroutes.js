@@ -1,6 +1,7 @@
 import express from "express";
 import UserList from "../schemas/UserSchema.js";
 import OrderList from "../schemas/OrderSchema.js";
+import MedList from "../schemas/MedicineSchema.js";
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
@@ -198,6 +199,45 @@ router.post("/getlimitedorders", async (req, res) => {
     ).sort({ $natural: -1 });
     res.status(200).send(images);
   } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+router.post("/review/add", async (req, res) => {
+  const { mid, cid, oid, reviewData, email, qty } = req.body;
+  try {
+    const addinmed = await MedList.updateOne(
+      { _id: mid },
+      { $push: { reviews: reviewData } }
+    );
+
+    try {
+      const addreviewinuser = await UserList.updateOne(
+        {
+          email,
+        },
+        {
+          $set: {
+            "orders.$[o].singleorder.details.cartdet.cartitems.$[c].cid": cid,
+            "orders.$[o].singleorder.details.cartdet.cartitems.$[c].mid": mid,
+            "orders.$[o].singleorder.details.cartdet.cartitems.$[c].isReviewed": true,
+            "orders.$[o].singleorder.details.cartdet.cartitems.$[c].qty": qty,
+          },
+        },
+        {
+          arrayFilters: [
+            { "o.singleorder.oid": oid },
+            { "c.cid": cid, "c.mid": mid },
+          ],
+        }
+      );
+      res.status(200).send({ msg: "Review added by user!!!" });
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  } catch (e) {
+    console.log(e);
     res.status(400).send(e);
   }
 });
